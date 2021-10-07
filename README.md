@@ -7,6 +7,7 @@ install tesseract for windows to lib directory. https://github.com/UB-Mannheim/t
 
 run: 
 cd ocr_service
+
 python main.py --input=./test/1.pdf --output=./test/1.txt
 
 The input file have to be {pdf, png, jpeg, jpg} only format. Output file have to be only txt format
