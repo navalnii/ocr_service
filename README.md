@@ -6,6 +6,7 @@ install tesseract for windows to lib directory. https://github.com/UB-Mannheim/t
 - linux and macos not nesessary to install tesseract. It should install via run poerty
 
 run: 
+
 cd ocr_service
 
 python main.py --input=./test/1.pdf --output=./test/1.txt
