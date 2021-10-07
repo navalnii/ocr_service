@@ -1,6 +1,7 @@
 import os
 import sys
 import click
+import shutil
 from pathlib import Path
 import logging
 import pytesseract
@@ -18,6 +19,8 @@ from spellchecker import SpellChecker
 if sys.platform == 'win32':
     pytesseract.pytesseract.tesseract_cmd = str(config.pytesseract_path)
 
+supported_format = {'pdf', 'jpg', 'jpeg', 'png'}
+
 
 logger = logging.getLogger('ocr_logger')
 logger.setLevel(logging.INFO)
@@ -29,37 +32,40 @@ logger.addHandler(handler)
 
 
 @click.command()
-@click.option('--input', prompt='Your input file is: ', help='Input file. Supported only pdf-format')
+@click.option('--input', prompt='Your input file is: ', help='Input file. Supported pdf, png, jpg format')
 @click.option('--output', help='Output file. Extracted text from input.')
 def extract_text(input, output):
     """
-    python your_code.py --input=./{input_name} --output=./test/{output_name.txt} --verbose
+    python main.py --input=./{input_name} --output=./test/{output_name.txt} --verbose
     """
 
-    input_pdf = Path(input)
-    if input_pdf.is_file():
+    input_path = Path(input)
+    input_format = input.split('/')[-1].split('.')[-1]
+    output_path = Path(output)
+    output_format = output.split('/')[-1].split('.')[-1]
 
-        logger.info(f'The input file {input_pdf} has been successfully read')
-        ocr_s = ocrService()
-        ocr_s.input_file(input)
-        text = ocr_s.correct_spelling()
-    else:
-        logger.warning(f'The input file {input_pdf} does not exists!')
+    if input_path.is_file() and input_format in supported_format:
+        logger.info(f'The input file {input_path} has been read')
+        
+        # Create txt output text, according output
+        if output_format == 'txt':
+            with open(output_path, 'w') as output_file:
+                output_file.write('')
 
-    # Create txt output text, according output
-    if output.split('/')[-1].split('.')[-1] == 'txt':
-        with open(output, 'w') as output_file:
-            output_file.write('')
-    else:
-        logger.warning(f'Incorrect output file. Check dir or name output file!')
+            ocr_s = ocrService()
+            ocr_s.input_file(input)
+            text = ocr_s.correct_spelling()
 
-    output_txt = Path(output)
-    if output_txt.is_file():
-        with open(output, 'w', encoding='utf8') as output_file:
-            output_file.write(text)
-        logger.info('Correct spelled text saved')
+            with open(output_path, 'w', encoding='utf8') as output_file:
+                output_file.write(text)
+            logger.info('Correct spelled text from input has been saved')
+
+        else:
+            logger.warning(f'Incorrect output file!')
+            
     else:
-        logger.warning(f'The output file not found')
+        logger.warning(
+            f'The input file {input_path} does not exists or not supported format!')
 
 
 class ocrService:
@@ -85,7 +91,7 @@ class ocrService:
                 logger.info('Begining process pdf file')
                 self.pdf_format_process()
 
-            elif self.in_format in {'png', 'jpg', 'jpeg'}:
+            elif self.in_format in supported_format:
                 logger.info(f'Begining process {self.in_format} file')
                 self.im_format_process()
 
@@ -101,7 +107,8 @@ class ocrService:
                 self.split_to_contour_n_save(clean, ind, im_path)
 
             self.do_ocr()
-
+            self.remove_temp_image()
+            
         else:
             logger.warning(f'The pdf file {self.in_name} not found')
 
@@ -113,7 +120,8 @@ class ocrService:
         clean = self.remove_horizontal_lines(rotated)
         self.split_to_contour_n_save(clean)
         self.do_ocr()
-
+        self.remove_temp_image()
+        
 
     def pdf_to_image(self):
         try:
@@ -142,7 +150,6 @@ class ocrService:
             return True
 
         except:
-            print('f')
             logger.exception('message')
             return False
 
@@ -171,7 +178,6 @@ class ocrService:
         for c in contours:
             angle = cv2.minAreaRect(c)[-1]
             area = cv2.contourArea(c)
-            logger.info(f'Found contour with area: {area} and angle {angle}')
 
             if abs(angle) < 45 and abs(angle) > 0.001:
 
@@ -257,13 +263,24 @@ class ocrService:
                 img_rgb = cv2.cvtColor(
                     image[y:y + h, x:x + w], cv2.COLOR_BGR2RGB)
 
-                self.roi_path.append(contour_path.joinpath(f'./{c_indx}.jpg'))
+                cnt_path = contour_path.joinpath(f'./{c_indx}.jpg')
+                
+                self.roi_path.append(cnt_path)
                 self.roi_name.append(f'{c_indx}.jpg')
-                cv2.imwrite(str(self.roi_path), img_rgb)
-
+                
+                cv2.imwrite(str(cnt_path), img_rgb)
                 logger.info(
-                    f'The contour with coords: {y,y + h, x,x + w} has been saved to {self.roi_path}')
+                    f'The cnt {c_indx}.jpg with coords:{y,y + h, x,x + w} saved')
 
+
+    def remove_temp_image(self):
+        try:
+            if self.in_format == 'pdf':
+                shutil.rmtree(self.roi_path[0].parent.parent)
+            else:
+                shutil.rmtree(self.roi_path[0].parent)
+        except:
+            logger.exception('message')
 
 # --------------------------------------------------------------------------------
 # --------------------------------------NLP---------------------------------------

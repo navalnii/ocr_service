@@ -55,9 +55,9 @@ python-versions = ">=3.6"
 numpy = ">=1.21.0"
 
 [[package]]
-name = "tesserocr"
-version = "2.5.2"
-description = "A simple, Pillow-friendly, Python wrapper around tesseract-ocr API using Cython"
+name = "pyspellchecker"
+version = "0.6.2"
+description = "Pure python spell checker based on work by Peter Norvig"
 category = "main"
 optional = false
 python-versions = "*"
@@ -85,7 +85,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "3.7"
-content-hash = "3c8d9098bace4f31921f569bbc8d550feb8da94148b07dbf6005415e36c8c3ff"
+content-hash = "d9c797d195143ecf7147c949de8dd046b76f7681b3657066fcd193d44efbe95f"
 
 [metadata.files]
 click = [
@@ -158,8 +158,9 @@ opencv-python = [
     {file = "opencv_python-4.5.3.56-cp39-cp39-win32.whl", hash = "sha256:085232718f28bddd265da480874c37db5c7354cb08f23f4a68a8639b16276a89"},
     {file = "opencv_python-4.5.3.56-cp39-cp39-win_amd64.whl", hash = "sha256:205a73adb29c37e42475645519e612e843a985475da993d10b4d5daa6afec36a"},
 ]
-tesserocr = [
-    {file = "tesserocr-2.5.2.tar.gz", hash = "sha256:9371dd3f6fe3238039c73bfe15bcaf21389f7e75f62bd530a30110149f39b2ae"},
+pyspellchecker = [
+    {file = "pyspellchecker-0.6.2-py3-none-any.whl", hash = "sha256:218759d4166fd49dee5c0473da99792d9274aca495ded0d9594a0bd75e2831ca"},
+    {file = "pyspellchecker-0.6.2.tar.gz", hash = "sha256:af6a1d0393a175499475a873f31e52135f1efd5fc912c979101b795b3c2ee77f"},
 ]
 typing-extensions = [
     {file = "typing_extensions-3.10.0.2-py2-none-any.whl", hash = "sha256:d8226d10bc02a29bcc81df19a26e56a9647f8b0a6d4a83924139f4a8b01f17b7"},
